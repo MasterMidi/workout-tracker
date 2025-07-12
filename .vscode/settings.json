@@ -3,5 +3,8 @@
         "source.fixAll": "explicit",
         "source.organizeImports": "explicit",
         "source.sortMembers": "explicit"
+    },
+    "yaml.schemas": {
+        "https://www.schemastore.org/github-workflow.json": "file:///home/michael/dev/workout-tracker/.github/worfklows/ci.yaml"
     }
 }

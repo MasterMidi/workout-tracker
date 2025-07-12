@@ -1,0 +1,168 @@
+# .github/workflows/ci.yml
+# This GitHub Actions workflow provides a complete CI/CD pipeline for an Expo/React Native app.
+# It includes jobs for code quality checks, and End-to-End (E2E) testing on both Android and iOS using Maestro.
+
+name: Expo CI & E2E Tests
+
+# --- Triggers ---
+# This workflow runs on every push to the `main` branch and on any pull request.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ========================================
+  #      1. CODE QUALITY & STATIC ANALYSIS
+  # ========================================
+  # This job runs first to ensure code quality before proceeding to more expensive build/test jobs.
+  quality-checks:
+    name: 🧐 Code Quality Checks
+    runs-on: ubuntu-latest # Use a cost-effective runner for static analysis
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18" # Specify your project's Node.js version
+          cache: "npm" # Or 'yarn' if you use yarn
+
+      - name: 📦 Install dependencies
+        run: npm install # Or 'yarn install'
+
+      - name: 🎨 Run Prettier check
+        run: npx prettier --check .
+
+      - name: 👕 Run ESLint check
+        # Assumes you have `expo lint` configured.
+        run: npx expo lint
+
+      - name: ⌨️ Run TypeScript check
+        # This command checks for any TypeScript errors without compiling.
+        run: npx tsc --noEmit
+
+  # ========================================
+  #      2. ANDROID E2E TESTS
+  # ========================================
+  # This job builds the Android app and runs Maestro tests on an emulator.
+  # It depends on the 'quality-checks' job passing successfully.
+  android-e2e-tests:
+    name: 🤖 Android E2E Tests
+    needs: quality-checks # This job won't run until quality-checks passes
+    runs-on: ubuntu-latest # Linux runners are faster and cheaper for Android emulation
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: ☕ Setup Java (JDK)
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17" # Android builds require a specific JDK version
+
+      - name: 📦 Install dependencies
+        run: npm install
+
+      - name: 🛠️ Prebuild Android project
+        # This generates the native `android` directory from your Expo project.
+        run: npx expo prebuild --clean --platform android
+
+      - name: 🔨 Build Android App (.apk)
+        # This compiles the native code into a release APK.
+        run: ./android/gradlew assembleRelease -p ./android
+
+      - name: 🤖 Run Android Emulator and Maestro Tests
+        # This action handles setting up the emulator and running your tests.
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30 # Choose an API level for your emulator
+          script: |
+            # Install Maestro
+            curl -Ls "https://get.maestro.mobile.dev" | bash
+            export PATH="$PATH":"$HOME/.maestro/bin"
+
+            # Run Maestro tests against the generated APK
+            maestro test --format junit --output-dir artifacts .maestro
+
+      - name: 📤 Upload Test Artifacts on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-test-artifacts
+          path: artifacts/
+
+  # ========================================
+  #      3. iOS E2E TESTS
+  # ========================================
+  # This job builds the iOS app and runs Maestro tests on a simulator.
+  # It also depends on the 'quality-checks' job.
+  # NOTE: This requires a macOS runner, which is more expensive than Linux.
+  ios-e2e-tests:
+    name: 🍎 iOS E2E Tests
+    needs: quality-checks
+    runs-on: macos-latest # iOS simulators can ONLY run on macOS.
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: 💎 Setup Ruby and Bundler
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "2.7" # Or the version compatible with your CocoaPods
+          bundler-cache: true
+
+      - name: 📦 Install dependencies
+        run: npm install
+
+      - name: 📦 Install CocoaPods
+        # Installs the native iOS dependencies.
+        run: |
+          npx expo prebuild --clean --platform ios
+          cd ios && pod install && cd ..
+
+      - name: 🔨 Build iOS App (.app)
+        # This builds the app for the simulator.
+        run: |
+          npx xcodebuild -workspace ios/YourAppName.xcworkspace \
+                         -scheme YourAppName \
+                         -sdk iphonesimulator \
+                         -destination 'platform=iOS Simulator,name=iPhone 14' \
+                         -derivedDataPath ./ios/build
+
+      - name: 🧪 Run iOS Simulator and Maestro Tests
+        run: |
+          # Install Maestro and its iOS dependency (idb)
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          export PATH="$PATH":"$HOME/.maestro/bin"
+          brew tap facebook/fb
+          brew install idb-companion
+
+          # Find the path to the built .app file
+          APP_PATH=$(find ./ios/build -name "*.app" -print -quit)
+
+          # Run Maestro tests
+          maestro test --format junit --output-dir artifacts .maestro
+
+      - name: 📤 Upload Test Artifacts on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-test-artifacts
+          path: artifacts/
