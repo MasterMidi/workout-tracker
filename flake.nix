@@ -32,6 +32,9 @@
             # For Android development
             jdk17
 
+            # Testing framework
+            maestro
+
             # For iOS development (macOS only)
             (lib.optional stdenv.isDarwin [
               cocoapods
