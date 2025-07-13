@@ -1,0 +1,10 @@
+appId: host.exp.Exponent
+---
+- launchApp
+- tapOn: "Add one"
+- tapOn:
+    id: "add_ten"
+- assertVisible: "Number of taps: 11"
+- tapOn: "Change me!"
+- inputText: "Hello, Maestro!"
+- assertVisible: "You typed: Hello, Maestro!"
