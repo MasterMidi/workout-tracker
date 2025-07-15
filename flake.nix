@@ -18,6 +18,22 @@
         pkgs = import nixpkgs {
           inherit system;
           config.android_sdk.accept_license = true;
+          config.allowUnfree = true;
+        };
+
+        androidComposition = pkgs.androidenv.composeAndroidPackages {
+          platformVersions = [ "35" ];
+          platformToolsVersion = [ "35.0.2" ];
+          buildToolsVersions = [ "35.0.1" ];
+          systemImageTypes = [ "google_apis_playstore" ];
+          abiVersions = [
+            "arm64-v8a"
+          ];
+          includeNDK = true;
+          includeExtras = [
+            "extras;google;auto"
+          ];
+          includeEmulator = true;
         };
       in
       {
@@ -25,21 +41,17 @@
           buildInputs = with pkgs; [
             nodejs_24
             watchman
-            (with nodePackages; [
-              # eas-cli
-            ])
 
             # For Android development
             jdk17
+            (android-studio.withSdk androidComposition.androidsdk)
 
-            # For iOS development (macOS only)
-            (lib.optional stdenv.isDarwin [
-              cocoapods
-              xcbuild
-            ])
+            # Testing framework
+            maestro
           ];
 
           shellHook = ''
+            export ANDROID_HOME=${androidComposition.androidsdk}/libexec/android-sdk
             echo "Expo development environment activated!"
             echo "Run 'npx create-expo-app my-app' to create a new Expo project"
           '';
