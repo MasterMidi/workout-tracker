@@ -1,9 +1,12 @@
 {
-    "editor.codeActionsOnSave": {
-        "source.fixAll": "explicit",
-        "source.organizeImports": "explicit",
-        "source.sortMembers": "explicit"
-    },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit",
+    "source.sortMembers": "explicit"
+  },
+  "shellcheck.ignorePatterns": {
+    "**/.envrc": true,
+  },
   "nixEnvSelector.nixFile": "${workspaceFolder}/.devenv.flake.nix",
   "json.schemas": [
     {
