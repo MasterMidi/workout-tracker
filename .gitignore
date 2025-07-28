@@ -49,3 +49,17 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Android project settings
+.android/
+
+# Devenv
+.devenv*
+devenv.local.nix
+local.properties
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
