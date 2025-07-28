@@ -1,33 +1,24 @@
-{
-  pkgs,
-  lib,
-  config,
-  inputs,
-  ...
-}:
+{ pkgs, ... }:
 
 let
   # 1. Read the app.json file and parse it into a Nix attribute set
-  appConfig = builtins.fromJSON (builtins.readFile ./app.json);
+  #   appConfig = builtins.fromJSON (builtins.readFile ./app.json);
+  appConfig = ./app.json |> builtins.readFile |> builtins.fromJSON;
 
   # 2. Find the 'expo-build-properties' entry in the plugins list.
   # We search for a list where the first item is the plugin name.
   buildPropertiesPlugin =
-    pkgs.lib.findFirst
-      (plugin: pkgs.lib.isList plugin && builtins.head plugin == "expo-build-properties")
-      (throw "Error: Could not find 'expo-build-properties' in your app.json plugins list.")
-      appConfig.expo.plugins;
+    appConfig.expo.plugins
+    |> pkgs.lib.findFirst (
+      plugin: pkgs.lib.isList plugin && builtins.head plugin == "expo-build-properties"
+    ) (throw "Error: Could not find 'expo-build-properties' in your app.json plugins list.");
 
   # 3. Extract the android properties from the found plugin.
   # The properties are the second item in the list (e.g., [ "plugin-name", {properties} ]).
   androidProps = (builtins.elemAt buildPropertiesPlugin 1).android;
-
 in
 
 {
-  # https://devenv.sh/basics/
-  env.GREET = "devenv";
-
   packages = with pkgs; [
     watchman
 
@@ -36,8 +27,23 @@ in
     git
   ];
 
-  # https://devenv.sh/languages/
-  # languages.rust.enable = true;
+  enterShell = ''
+    echo "Welcome to the Workout Tracker dev environment! 🚀"
+  '';
+
+  git-hooks.hooks = {
+    prettier = {
+      enable = true;
+      types_or = [
+        "javascript"
+        "ts"
+        "tsx"
+        "json"
+        "markdown"
+      ];
+    };
+  };
+
   languages.javascript = {
     enable = true;
     package = pkgs.nodejs_23;
@@ -73,37 +79,4 @@ in
     googleAPIs.enable = true;
     reactNative.enable = true;
   };
-
-  # https://devenv.sh/processes/
-  # processes.cargo-watch.exec = "cargo-watch";
-
-  # https://devenv.sh/services/
-  # services.postgres.enable = true;
-
-  # https://devenv.sh/scripts/
-  scripts.hello.exec = ''
-    echo hello from $GREET
-  '';
-
-  enterShell = ''
-    hello
-    git --version
-  '';
-
-  # https://devenv.sh/tasks/
-  # tasks = {
-  #   "myproj:setup".exec = "mytool build";
-  #   "devenv:enterShell".after = [ "myproj:setup" ];
-  # };
-
-  # https://devenv.sh/tests/
-  enterTest = ''
-    echo "Running tests"
-    git --version | grep --color=auto "${pkgs.git.version}"
-  '';
-
-  # https://devenv.sh/git-hooks/
-  # git-hooks.hooks.shellcheck.enable = true;
-
-  # See full reference at https://devenv.sh/reference/options/
 }
