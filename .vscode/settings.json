@@ -5,15 +5,16 @@
     "source.sortMembers": "explicit"
   },
   "shellcheck.ignorePatterns": {
-    "**/.envrc": true,
+    "**/.envrc": true
   },
   "nixEnvSelector.nixFile": "${workspaceFolder}/.devenv.flake.nix",
   "json.schemas": [
     {
-      "fileMatch": [
-        "/app.json"
-      ],
+      "fileMatch": ["/app.json"],
       "url": "https://raw.githubusercontent.com/expo/expo/refs/heads/main/docs/public/static/schemas/unversioned/app-config-schema.json"
     }
-  ]
+  ],
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }

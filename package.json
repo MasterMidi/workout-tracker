@@ -2,6 +2,7 @@
   "name": "workout-tracker",
   "main": "expo-router/entry",
   "version": "0.1.0",
+  "type": "module",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
@@ -41,9 +42,10 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~19.0.10",
-    "typescript": "~5.8.3",
     "eslint": "^9.25.0",
-    "eslint-config-expo": "~9.2.0"
+    "eslint-config-expo": "~9.2.0",
+    "eslint-plugin-jsdoc": "^52.0.0",
+    "typescript": "~5.8.3"
   },
   "private": true
 }
