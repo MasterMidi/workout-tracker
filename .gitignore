@@ -50,6 +50,9 @@ yarn-error.*
 
 app-example
 
+# JetBrains IDE
+.idea/*
+
 # Android project settings
 .android/
 
