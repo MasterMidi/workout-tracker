@@ -63,30 +63,21 @@ const EXERCISES_DATA: ExerciseListItem[] = [
   },
 ];
 
-// ### Props for the ExerciseItem component are updated ###
 type ExerciseItemProps = {
   item: ExerciseListItem;
   isSelected: boolean;
   onSelect: () => void;
 };
 
-// ### The ExerciseItem component is updated to handle selection ###
 const ExerciseItem = ({ item, isSelected, onSelect }: ExerciseItemProps) => (
   <Pressable onPress={onSelect}>
-    <View
-      style={[
-        styles.itemContainer,
-        // Apply 'itemSelected' style if the item is selected
-        isSelected && styles.itemSelected,
-      ]}
-    >
+    <View style={[styles.itemContainer, isSelected && styles.itemSelected]}>
       <View style={styles.itemHeader}>
         <Text style={styles.itemName}>{item.name}</Text>
       </View>
       <View style={styles.itemDetails}>
         <View style={styles.equipmentContainer}>
           {item.equipment.map((x) => (
-            // Added a unique key for each mapped element
             <Text key={x} style={styles.itemTypeLabel}>
               {x}
             </Text>
@@ -99,17 +90,13 @@ const ExerciseItem = ({ item, isSelected, onSelect }: ExerciseItemProps) => (
 );
 
 export default function ExerciseListScreen() {
-  // ### State to hold the IDs of selected items ###
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
-  // ### Function to handle selecting/deselecting an item ###
   const handleSelectItem = (id: string) => {
     setSelectedItems((currentSelected) => {
       if (currentSelected.includes(id)) {
-        // If already selected, remove it from the array
         return currentSelected.filter((itemId) => itemId !== id);
       } else {
-        // If not selected, add it to the array
         return [...currentSelected, id];
       }
     });
@@ -119,7 +106,6 @@ export default function ExerciseListScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.title}>Exercises</Text>
-        {/* The Text component below will display the number of selected items */}
         <Text style={styles.selectionCount}>
           Selected: {selectedItems.length}
         </Text>
@@ -128,14 +114,11 @@ export default function ExerciseListScreen() {
           renderItem={({ item }) => (
             <ExerciseItem
               item={item}
-              // Pass the selection status to the item
               isSelected={selectedItems.includes(item.id)}
-              // Pass the handler function to the item
               onSelect={() => handleSelectItem(item.id)}
             />
           )}
           keyExtractor={(item) => item.id}
-          // ### extraData tells FlashList to re-render when selectedItems changes ###
           extraData={selectedItems}
           contentContainerStyle={styles.listContentContainer}
         />
@@ -175,7 +158,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: 'transparent', // Default transparent border
+    borderColor: 'transparent',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -185,7 +168,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  // ### Style for selected items ###
   itemSelected: {
     backgroundColor: '#e6f2ff',
     borderColor: '#007AFF',
