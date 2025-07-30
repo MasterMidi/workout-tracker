@@ -1,4 +1,7 @@
+// app/add-exercise.tsx
 import { FlashList } from '@shopify/flash-list';
+import { useRouter } from 'expo-router';
+import { useSetAtom } from 'jotai';
 import React, { useState } from 'react';
 import {
   Pressable,
@@ -6,11 +9,14 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
-import 'react-native-get-random-values'; // Needed for crypto support (ulid)
+import 'react-native-get-random-values';
 import { ulid } from 'ulid';
+import { selectedExercisesAtom } from '../store/atoms';
 
+// DATA AND TYPES (Unchanged)
 type ExerciseListItem = {
   id: string;
   name: string;
@@ -69,6 +75,7 @@ type ExerciseItemProps = {
   onSelect: () => void;
 };
 
+// COMPONENT FOR A SINGLE ITEM (Unchanged)
 const ExerciseItem = ({ item, isSelected, onSelect }: ExerciseItemProps) => (
   <Pressable onPress={onSelect}>
     <View style={[styles.itemContainer, isSelected && styles.itemSelected]}>
@@ -89,7 +96,9 @@ const ExerciseItem = ({ item, isSelected, onSelect }: ExerciseItemProps) => (
   </Pressable>
 );
 
-export default function ExerciseListScreen() {
+export default function AddExerciseScreen() {
+  const router = useRouter();
+  const setSelectedExercises = useSetAtom(selectedExercisesAtom);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   const handleSelectItem = (id: string) => {
@@ -102,10 +111,17 @@ export default function ExerciseListScreen() {
     });
   };
 
+  const handleConfirmSelection = () => {
+    // 1. Set the global state with the selected exercise IDs
+    setSelectedExercises(selectedItems);
+    // 2. Navigate back to the previous screen (the workout screen)
+    router.back();
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>Exercises</Text>
+        <Text style={styles.title}>Select Exercises</Text>
         <Text style={styles.selectionCount}>
           Selected: {selectedItems.length}
         </Text>
@@ -120,13 +136,34 @@ export default function ExerciseListScreen() {
           )}
           keyExtractor={(item) => item.id}
           extraData={selectedItems}
-          contentContainerStyle={styles.listContentContainer}
+          contentContainerStyle={
+            selectedItems.length > 0
+              ? styles.listContentContainerPadding
+              : styles.listContentContainer
+          }
+          estimatedItemSize={137}
         />
       </View>
+
+      {selectedItems.length > 0 && (
+        <View style={styles.floatingButtonContainer}>
+          <TouchableOpacity
+            style={styles.floatingButton}
+            onPress={handleConfirmSelection}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.floatingButtonText}>
+              Add {selectedItems.length}{' '}
+              {selectedItems.length === 1 ? 'Exercise' : 'Exercises'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
 
+// STYLES (Unchanged)
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -150,7 +187,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   listContentContainer: {
-    paddingBottom: 20,
+    paddingBottom: 60,
+  },
+  listContentContainerPadding: {
+    paddingBottom: 120,
   },
   itemContainer: {
     backgroundColor: '#ffffff',
@@ -160,10 +200,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'transparent',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -212,5 +249,30 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'right',
     marginLeft: 10,
+  },
+  floatingButtonContainer: {
+    position: 'absolute',
+    bottom: 60,
+    left: 10,
+    right: 10,
+  },
+  floatingButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
+  },
+  floatingButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
