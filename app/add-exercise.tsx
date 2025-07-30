@@ -1,4 +1,7 @@
+// app/add-exercise.tsx
 import { FlashList } from '@shopify/flash-list';
+import { useRouter } from 'expo-router';
+import { useSetAtom } from 'jotai';
 import React, { useState } from 'react';
 import {
   Pressable,
@@ -6,12 +9,14 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  TouchableOpacity, // Import TouchableOpacity for the button
+  TouchableOpacity,
   View,
 } from 'react-native';
-import 'react-native-get-random-values'; // Needed for crypto support (ulid)
+import 'react-native-get-random-values';
 import { ulid } from 'ulid';
+import { selectedExercisesAtom } from '../store/atoms';
 
+// DATA AND TYPES (Unchanged)
 type ExerciseListItem = {
   id: string;
   name: string;
@@ -70,6 +75,7 @@ type ExerciseItemProps = {
   onSelect: () => void;
 };
 
+// COMPONENT FOR A SINGLE ITEM (Unchanged)
 const ExerciseItem = ({ item, isSelected, onSelect }: ExerciseItemProps) => (
   <Pressable onPress={onSelect}>
     <View style={[styles.itemContainer, isSelected && styles.itemSelected]}>
@@ -90,7 +96,9 @@ const ExerciseItem = ({ item, isSelected, onSelect }: ExerciseItemProps) => (
   </Pressable>
 );
 
-export default function ExerciseListScreen() {
+export default function AddExerciseScreen() {
+  const router = useRouter();
+  const setSelectedExercises = useSetAtom(selectedExercisesAtom);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   const handleSelectItem = (id: string) => {
@@ -103,17 +111,17 @@ export default function ExerciseListScreen() {
     });
   };
 
-  const handleAddExercises = () => {
-    // A placeholder action for when the button is pressed
-    alert(`You are adding ${selectedItems.length} exercises to your workout!`);
-    // Here you would typically navigate or update a global state
-    setSelectedItems([]); // Optionally clear selection after adding
+  const handleConfirmSelection = () => {
+    // 1. Set the global state with the selected exercise IDs
+    setSelectedExercises(selectedItems);
+    // 2. Navigate back to the previous screen (the workout screen)
+    router.back();
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>Exercises</Text>
+        <Text style={styles.title}>Select Exercises</Text>
         <Text style={styles.selectionCount}>
           Selected: {selectedItems.length}
         </Text>
@@ -129,6 +137,7 @@ export default function ExerciseListScreen() {
           keyExtractor={(item) => item.id}
           extraData={selectedItems}
           contentContainerStyle={styles.listContentContainer}
+          estimatedItemSize={137}
         />
       </View>
 
@@ -136,7 +145,7 @@ export default function ExerciseListScreen() {
         <View style={styles.floatingButtonContainer}>
           <TouchableOpacity
             style={styles.floatingButton}
-            onPress={handleAddExercises}
+            onPress={handleConfirmSelection}
             activeOpacity={0.8}
           >
             <Text style={styles.floatingButtonText}>
@@ -150,6 +159,7 @@ export default function ExerciseListScreen() {
   );
 }
 
+// STYLES (Unchanged)
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -235,9 +245,9 @@ const styles = StyleSheet.create({
   },
   floatingButtonContainer: {
     position: 'absolute',
-    bottom: 10, // Distance from the bottom of the screen
-    left: 10, // Left margin, creating the "floating" space
-    right: 10, // Right margin, creating the "floating" space
+    bottom: 60,
+    left: 10,
+    right: 10,
   },
   floatingButton: {
     backgroundColor: '#007AFF',
@@ -253,7 +263,6 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 8,
   },
-  // Text style remains the same.
   floatingButtonText: {
     color: '#ffffff',
     fontSize: 16,
