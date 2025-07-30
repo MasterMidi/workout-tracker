@@ -1,4 +1,5 @@
 // app/add-exercise.tsx
+import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { useSetAtom } from 'jotai';
@@ -24,7 +25,7 @@ type ExerciseListItem = {
   muscleGroups: string[];
 };
 
-const EXERCISES_DATA: ExerciseListItem[] = [
+export const EXERCISES_DATA: ExerciseListItem[] = [
   {
     id: ulid(),
     name: 'Chest Press',
@@ -73,14 +74,33 @@ type ExerciseItemProps = {
   item: ExerciseListItem;
   isSelected: boolean;
   onSelect: () => void;
+  onShowDetails: () => void;
 };
 
 // COMPONENT FOR A SINGLE ITEM (Unchanged)
-const ExerciseItem = ({ item, isSelected, onSelect }: ExerciseItemProps) => (
+const ExerciseItem = ({
+  item,
+  isSelected,
+  onSelect,
+  onShowDetails,
+}: ExerciseItemProps) => (
   <Pressable onPress={onSelect}>
     <View style={[styles.itemContainer, isSelected && styles.itemSelected]}>
       <View style={styles.itemHeader}>
         <Text style={styles.itemName}>{item.name}</Text>
+        <TouchableOpacity
+          style={styles.detailsButton}
+          onPress={(e) => {
+            e.stopPropagation(); // Prevent the main Pressable's onSelect from firing
+            onShowDetails();
+          }}
+        >
+          <Ionicons
+            name="information-circle-outline"
+            size={26}
+            color="#007AFF"
+          />
+        </TouchableOpacity>
       </View>
       <View style={styles.itemDetails}>
         <View style={styles.equipmentContainer}>
@@ -132,6 +152,7 @@ export default function AddExerciseScreen() {
               item={item}
               isSelected={selectedItems.includes(item.id)}
               onSelect={() => handleSelectItem(item.id)}
+              onShowDetails={() => router.push(`/exercise/${item.id}`)}
             />
           )}
           keyExtractor={(item) => item.id}
@@ -248,6 +269,9 @@ const styles = StyleSheet.create({
     color: '#888',
     flex: 1,
     textAlign: 'right',
+    marginLeft: 10,
+  },
+  detailsButton: {
     marginLeft: 10,
   },
   floatingButtonContainer: {
