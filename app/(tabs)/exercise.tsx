@@ -6,6 +6,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity, // Import TouchableOpacity for the button
   View,
 } from 'react-native';
 import 'react-native-get-random-values'; // Needed for crypto support (ulid)
@@ -102,6 +103,13 @@ export default function ExerciseListScreen() {
     });
   };
 
+  const handleAddExercises = () => {
+    // A placeholder action for when the button is pressed
+    alert(`You are adding ${selectedItems.length} exercises to your workout!`);
+    // Here you would typically navigate or update a global state
+    setSelectedItems([]); // Optionally clear selection after adding
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -123,6 +131,21 @@ export default function ExerciseListScreen() {
           contentContainerStyle={styles.listContentContainer}
         />
       </View>
+
+      {selectedItems.length > 0 && (
+        <View style={styles.floatingButtonContainer}>
+          <TouchableOpacity
+            style={styles.floatingButton}
+            onPress={handleAddExercises}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.floatingButtonText}>
+              Add {selectedItems.length}{' '}
+              {selectedItems.length === 1 ? 'Exercise' : 'Exercises'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -160,10 +183,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'transparent',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -212,5 +232,31 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'right',
     marginLeft: 10,
+  },
+  floatingButtonContainer: {
+    position: 'absolute',
+    bottom: 10, // Distance from the bottom of the screen
+    left: 10, // Left margin, creating the "floating" space
+    right: 10, // Right margin, creating the "floating" space
+  },
+  floatingButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
+  },
+  // Text style remains the same.
+  floatingButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
