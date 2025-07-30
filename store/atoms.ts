@@ -1,5 +1,6 @@
-import { ExerciseListItem } from '@/app/add-exercise';
+import { ExerciseListItem } from '@/app/exercise/add-exercise';
 import { atom } from 'jotai';
+import 'react-native-get-random-values';
 import { ulid } from 'ulid';
 
 /**

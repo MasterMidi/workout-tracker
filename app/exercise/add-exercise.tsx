@@ -13,8 +13,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import 'react-native-get-random-values';
-import { selectedExercisesAtom, TESTING_EXERCISES_DATA } from '../store/atoms';
+import {
+  selectedExercisesAtom,
+  TESTING_EXERCISES_DATA,
+} from '../../store/atoms';
 
 // DATA AND TYPES (Unchanged)
 export type ExerciseListItem = {
@@ -96,7 +98,6 @@ export default function AddExerciseScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>Select Exercises</Text>
         <Text style={styles.selectionCount}>
           Selected: {selectedItems.length}
         </Text>
