@@ -136,7 +136,11 @@ export default function AddExerciseScreen() {
           )}
           keyExtractor={(item) => item.id}
           extraData={selectedItems}
-          contentContainerStyle={styles.listContentContainer}
+          contentContainerStyle={
+            selectedItems.length > 0
+              ? styles.listContentContainerPadding
+              : styles.listContentContainer
+          }
           estimatedItemSize={137}
         />
       </View>
@@ -183,7 +187,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   listContentContainer: {
-    paddingBottom: 20,
+    paddingBottom: 60,
+  },
+  listContentContainerPadding: {
+    paddingBottom: 120,
   },
   itemContainer: {
     backgroundColor: '#ffffff',
