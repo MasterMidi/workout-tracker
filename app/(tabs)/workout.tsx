@@ -54,7 +54,9 @@ export default function WorkoutScreen() {
         <Text style={styles.title}>My Workout Routine 💪</Text>
         <Button
           title="Add Exercises to Workout"
-          onPress={() => router.push('/add-exercise')}
+          onPress={() =>
+            router.push('/exercise/add-exercise', { withAnchor: false })
+          }
         />
 
         <View style={styles.listContainer}>

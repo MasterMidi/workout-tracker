@@ -1,7 +1,8 @@
 // app/add-exercise.tsx
+import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
-import { useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import React, { useState } from 'react';
 import {
   Pressable,
@@ -12,75 +13,50 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import 'react-native-get-random-values';
-import { ulid } from 'ulid';
-import { selectedExercisesAtom } from '../store/atoms';
+import {
+  selectedExercisesAtom,
+  TESTING_EXERCISES_LIST_VIEW,
+} from '../../store/atoms';
 
 // DATA AND TYPES (Unchanged)
-type ExerciseListItem = {
+export type ExerciseListItem = {
   id: string;
   name: string;
   equipment: string[];
   muscleGroups: string[];
 };
 
-const EXERCISES_DATA: ExerciseListItem[] = [
-  {
-    id: ulid(),
-    name: 'Chest Press',
-    equipment: ['Machine'],
-    muscleGroups: ['Chest', 'Shoulders', 'Triceps'],
-  },
-  {
-    id: ulid(),
-    name: 'Glute Ham Raise',
-    equipment: ['Other'],
-    muscleGroups: ['Hamstring', 'Glutes'],
-  },
-  {
-    id: ulid(),
-    name: 'Romanian Deadlift',
-    equipment: ['Barbell'],
-    muscleGroups: ['Hamstring', 'Glutes', 'Lower back', 'Upper back', 'Lats'],
-  },
-  {
-    id: ulid(),
-    name: 'Pull Up',
-    equipment: ['Other'],
-    muscleGroups: ['Lats', 'Upper back', 'Biceps', 'Forearms'],
-  },
-  {
-    id: ulid(),
-    name: 'Single Arm Lateral Raise',
-    equipment: ['Cable'],
-    muscleGroups: ['Shoulders'],
-  },
-  {
-    id: ulid(),
-    name: 'Rear Delt Reverse Fly',
-    equipment: ['Cable'],
-    muscleGroups: ['Shoulders', 'Upper back'],
-  },
-  {
-    id: ulid(),
-    name: 'Leg Extension',
-    equipment: ['Machine'],
-    muscleGroups: ['Quadriceps'],
-  },
-];
-
 type ExerciseItemProps = {
   item: ExerciseListItem;
   isSelected: boolean;
   onSelect: () => void;
+  onShowDetails: () => void;
 };
 
 // COMPONENT FOR A SINGLE ITEM (Unchanged)
-const ExerciseItem = ({ item, isSelected, onSelect }: ExerciseItemProps) => (
+const ExerciseItem = ({
+  item,
+  isSelected,
+  onSelect,
+  onShowDetails,
+}: ExerciseItemProps) => (
   <Pressable onPress={onSelect}>
     <View style={[styles.itemContainer, isSelected && styles.itemSelected]}>
       <View style={styles.itemHeader}>
         <Text style={styles.itemName}>{item.name}</Text>
+        <TouchableOpacity
+          style={styles.detailsButton}
+          onPress={(e) => {
+            e.stopPropagation(); // Prevent the main Pressable's onSelect from firing
+            onShowDetails();
+          }}
+        >
+          <Ionicons
+            name="information-circle-outline"
+            size={26}
+            color="#007AFF"
+          />
+        </TouchableOpacity>
       </View>
       <View style={styles.itemDetails}>
         <View style={styles.equipmentContainer}>
@@ -99,6 +75,7 @@ const ExerciseItem = ({ item, isSelected, onSelect }: ExerciseItemProps) => (
 export default function AddExerciseScreen() {
   const router = useRouter();
   const setSelectedExercises = useSetAtom(selectedExercisesAtom);
+  const getExercisedList = useAtomValue(TESTING_EXERCISES_LIST_VIEW);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   const handleSelectItem = (id: string) => {
@@ -121,17 +98,17 @@ export default function AddExerciseScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>Select Exercises</Text>
         <Text style={styles.selectionCount}>
           Selected: {selectedItems.length}
         </Text>
         <FlashList
-          data={EXERCISES_DATA}
+          data={getExercisedList}
           renderItem={({ item }) => (
             <ExerciseItem
               item={item}
               isSelected={selectedItems.includes(item.id)}
               onSelect={() => handleSelectItem(item.id)}
+              onShowDetails={() => router.push(`/exercise/${item.id}`)}
             />
           )}
           keyExtractor={(item) => item.id}
@@ -248,6 +225,9 @@ const styles = StyleSheet.create({
     color: '#888',
     flex: 1,
     textAlign: 'right',
+    marginLeft: 10,
+  },
+  detailsButton: {
     marginLeft: 10,
   },
   floatingButtonContainer: {
