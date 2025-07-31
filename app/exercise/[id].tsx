@@ -1,5 +1,5 @@
 // app/exercise/[id].tsx
-import { TESTING_EXERCISES_DATA } from '@/store/atoms';
+import { TESTING_EXERCISES_LIST_VIEW } from '@/store/atoms';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useAtomValue } from 'jotai';
 import React from 'react';
@@ -10,7 +10,7 @@ export default function ExerciseDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   // Find the exercise that matches the id
-  const getExercisedList = useAtomValue(TESTING_EXERCISES_DATA);
+  const getExercisedList = useAtomValue(TESTING_EXERCISES_LIST_VIEW);
   const exercise = getExercisedList.find((e) => e.id === id);
 
   // Display a message if no exercise is found

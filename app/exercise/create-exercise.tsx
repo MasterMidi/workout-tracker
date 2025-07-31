@@ -1,5 +1,7 @@
 // app/create-exercise.tsx
+import { Exercise, ExerciseType, TESTING_EXERCISES } from '@/store/atoms';
 import { useRouter } from 'expo-router';
+import { useSetAtom } from 'jotai';
 import React, { useState } from 'react';
 import {
   Alert,
@@ -13,6 +15,7 @@ import {
   View,
 } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { ulid } from 'ulid';
 
 // --- Data for our dropdowns (Unchanged) ---
 const EQUIPMENT_ITEMS = [
@@ -49,35 +52,45 @@ export default function CreateExerciseScreen() {
   // --- State for the form inputs (Unchanged) ---
   const [name, setName] = useState('');
   const [equipmentOpen, setEquipmentOpen] = useState(false);
-  const [equipmentValue, setEquipmentValue] = useState<string | null>(null);
+  const [equipmentValue, setEquipmentValue] = useState<string[] | null>(null);
   const [equipmentItems, setEquipmentItems] = useState(EQUIPMENT_ITEMS);
-  const [musclesOpen, setMusclesOpen] = useState(false);
-  const [musclesValue, setMusclesValue] = useState<string[]>([]);
-  const [musclesItems, setMusclesItems] = useState(MUSCLE_GROUP_ITEMS);
+  const [primaryMusclesOpen, setPrimaryMusclesOpen] = useState(false);
+  const [secondaryMusclesOpen, setSecondaryMusclesOpen] = useState(false);
+  const [primaryMusclesValue, setPrimaryMusclesValue] = useState<string[]>([]);
+  const [secondaryMusclesValue, setSecondaryMusclesValue] = useState<string[]>(
+    []
+  );
+  const [primaryMusclesItems, setPrimaryMusclesItems] =
+    useState(MUSCLE_GROUP_ITEMS);
+  const [secondaryMusclesItems, setSecondaryMusclesItems] =
+    useState(MUSCLE_GROUP_ITEMS);
   const [typeOpen, setTypeOpen] = useState(false);
-  const [typeValue, setTypeValue] = useState<string | null>(null);
+  const [typeValue, setTypeValue] = useState<ExerciseType | null>(null);
   const [typeItems, setTypeItems] = useState(EXERCISE_TYPE_ITEMS);
+  const setExercisedList = useSetAtom(TESTING_EXERCISES);
 
   const handleSave = () => {
     if (
       !name.trim() ||
       !equipmentValue ||
-      musclesValue.length === 0 ||
+      primaryMusclesValue.length === 0 ||
       !typeValue
     ) {
       Alert.alert('Incomplete Form', 'Please fill out all fields.');
       return;
     }
-    const newExercise = {
+    const newExercise: Exercise = {
+      id: ulid(),
       name: name.trim(),
       equipment: equipmentValue,
-      muscleGroups: musclesValue,
+      primaryMuscles: primaryMusclesValue,
+      secondaryMuscles: secondaryMusclesValue,
       type: typeValue,
     };
-    console.log('New Exercise Created:', newExercise);
-    Alert.alert('Success', 'Exercise created!', [
-      { text: 'OK', onPress: () => router.back() },
-    ]);
+
+    setExercisedList((exercises) => [...exercises, newExercise]);
+
+    router.back();
   };
 
   return (
@@ -107,20 +120,38 @@ export default function CreateExerciseScreen() {
           setOpen={setEquipmentOpen}
           setValue={setEquipmentValue}
           setItems={setEquipmentItems}
+          multiple={true}
+          mode="BADGE"
           placeholder="Select equipment"
+          style={styles.picker}
+          zIndex={4000}
+        />
+
+        <Text style={styles.label}>Primary Muscle Groups</Text>
+        <DropDownPicker
+          listMode="MODAL" // <--- ADD THIS PROP
+          open={primaryMusclesOpen}
+          value={primaryMusclesValue}
+          items={primaryMusclesItems}
+          setOpen={setPrimaryMusclesOpen}
+          setValue={setPrimaryMusclesValue}
+          setItems={setPrimaryMusclesItems}
+          multiple={true}
+          mode="BADGE"
+          placeholder="Select muscle groups"
           style={styles.picker}
           zIndex={3000}
         />
 
-        <Text style={styles.label}>Muscle Groups</Text>
+        <Text style={styles.label}>Secondary Muscle Groups</Text>
         <DropDownPicker
           listMode="MODAL" // <--- ADD THIS PROP
-          open={musclesOpen}
-          value={musclesValue}
-          items={musclesItems}
-          setOpen={setMusclesOpen}
-          setValue={setMusclesValue}
-          setItems={setMusclesItems}
+          open={secondaryMusclesOpen}
+          value={secondaryMusclesValue}
+          items={secondaryMusclesItems}
+          setOpen={setSecondaryMusclesOpen}
+          setValue={setSecondaryMusclesValue}
+          setItems={setSecondaryMusclesItems}
           multiple={true}
           mode="BADGE"
           placeholder="Select muscle groups"

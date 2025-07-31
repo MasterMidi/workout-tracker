@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import {
   selectedExercisesAtom,
-  TESTING_EXERCISES_DATA,
+  TESTING_EXERCISES_LIST_VIEW,
 } from '../../store/atoms';
 
 // DATA AND TYPES (Unchanged)
@@ -75,7 +75,7 @@ const ExerciseItem = ({
 export default function AddExerciseScreen() {
   const router = useRouter();
   const setSelectedExercises = useSetAtom(selectedExercisesAtom);
-  const getExercisedList = useAtomValue(TESTING_EXERCISES_DATA);
+  const getExercisedList = useAtomValue(TESTING_EXERCISES_LIST_VIEW);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   const handleSelectItem = (id: string) => {
