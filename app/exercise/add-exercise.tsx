@@ -2,7 +2,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
-import { useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import React, { useState } from 'react';
 import {
   Pressable,
@@ -13,62 +13,18 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import 'react-native-get-random-values';
-import { ulid } from 'ulid';
-import { selectedExercisesAtom } from '../store/atoms';
+import {
+  selectedExercisesAtom,
+  TESTING_EXERCISES_LIST_VIEW,
+} from '../../store/atoms';
 
 // DATA AND TYPES (Unchanged)
-type ExerciseListItem = {
+export type ExerciseListItem = {
   id: string;
   name: string;
   equipment: string[];
   muscleGroups: string[];
 };
-
-export const EXERCISES_DATA: ExerciseListItem[] = [
-  {
-    id: ulid(),
-    name: 'Chest Press',
-    equipment: ['Machine'],
-    muscleGroups: ['Chest', 'Shoulders', 'Triceps'],
-  },
-  {
-    id: ulid(),
-    name: 'Glute Ham Raise',
-    equipment: ['Other'],
-    muscleGroups: ['Hamstring', 'Glutes'],
-  },
-  {
-    id: ulid(),
-    name: 'Romanian Deadlift',
-    equipment: ['Barbell'],
-    muscleGroups: ['Hamstring', 'Glutes', 'Lower back', 'Upper back', 'Lats'],
-  },
-  {
-    id: ulid(),
-    name: 'Pull Up',
-    equipment: ['Other'],
-    muscleGroups: ['Lats', 'Upper back', 'Biceps', 'Forearms'],
-  },
-  {
-    id: ulid(),
-    name: 'Single Arm Lateral Raise',
-    equipment: ['Cable'],
-    muscleGroups: ['Shoulders'],
-  },
-  {
-    id: ulid(),
-    name: 'Rear Delt Reverse Fly',
-    equipment: ['Cable'],
-    muscleGroups: ['Shoulders', 'Upper back'],
-  },
-  {
-    id: ulid(),
-    name: 'Leg Extension',
-    equipment: ['Machine'],
-    muscleGroups: ['Quadriceps'],
-  },
-];
 
 type ExerciseItemProps = {
   item: ExerciseListItem;
@@ -119,6 +75,7 @@ const ExerciseItem = ({
 export default function AddExerciseScreen() {
   const router = useRouter();
   const setSelectedExercises = useSetAtom(selectedExercisesAtom);
+  const getExercisedList = useAtomValue(TESTING_EXERCISES_LIST_VIEW);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   const handleSelectItem = (id: string) => {
@@ -141,12 +98,11 @@ export default function AddExerciseScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>Select Exercises</Text>
         <Text style={styles.selectionCount}>
           Selected: {selectedItems.length}
         </Text>
         <FlashList
-          data={EXERCISES_DATA}
+          data={getExercisedList}
           renderItem={({ item }) => (
             <ExerciseItem
               item={item}
